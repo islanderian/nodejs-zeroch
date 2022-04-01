@@ -1,5 +1,7 @@
 const express = require("express");
 const path = require("path");
+const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -7,23 +9,24 @@ const app = express();
 app.set("port", process.env.PORT || 3000); // 포트설정
 
 //--- 공통 미들웨어
-app.use(
-  (req, res, next) => {
-    console.log("모든 요청에 실행하고 싶어요.");
-    next(); // 다음 라우터 중 일치하는 것을 자동 실행
-  },
-  (req, res, next) => {
-    try {
-      console.log(dlkjlkfsd);
-    } catch (err) {
-      // next 에 인수가 있으면 바로 error 처리 미들웨어로 넘어감
-      next(err);
-    }
-  }
-);
+app.use(morgan("dev")); // 서버 정보 기록. "dev" 또는 "combined"
+app.use(cookieParser()); // 쿠키 설정들이 편해짐
 
 //--- 라우터들
 app.get("/", (req, res) => {
+  req.cookies; // {mycookie: "test"}
+
+  res.cookie("name", encodeURIComponent(name), {
+    expires: new Date(),
+    httpOnly: true,
+    path: "/",
+  });
+  // 쿠키 삭제
+  res.clearCookie("name", encodeURIComponent(name), {
+    httpOnly: true,
+    path: "/",
+  });
+
   res.sendFile(path.join(__dirname, "index.html"));
 });
 app.post("/", (req, res) => {
